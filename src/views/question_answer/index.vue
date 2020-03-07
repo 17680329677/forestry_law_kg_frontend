@@ -1,53 +1,22 @@
 <template>
   <div class="app-container">
     <el-form ref="form" :model="form" label-width="120px">
-      <el-form-item label="Activity name">
-        <el-input v-model="form.name" />
-      </el-form-item>
-      <el-form-item label="Activity zone">
-        <el-select v-model="form.region" placeholder="please select your zone">
-          <el-option label="Zone one" value="shanghai" />
-          <el-option label="Zone two" value="beijing" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="Activity time">
-        <el-col :span="11">
-          <el-date-picker v-model="form.date1" type="date" placeholder="Pick a date" style="width: 100%;" />
-        </el-col>
-        <el-col :span="2" class="line">-</el-col>
-        <el-col :span="11">
-          <el-time-picker v-model="form.date2" type="fixed-time" placeholder="Pick a time" style="width: 100%;" />
-        </el-col>
-      </el-form-item>
-      <el-form-item label="Instant delivery">
-        <el-switch v-model="form.delivery" />
-      </el-form-item>
-      <el-form-item label="Activity type">
-        <el-checkbox-group v-model="form.type">
-          <el-checkbox label="Online activities" name="type" />
-          <el-checkbox label="Promotion activities" name="type" />
-          <el-checkbox label="Offline activities" name="type" />
-          <el-checkbox label="Simple brand exposure" name="type" />
-        </el-checkbox-group>
-      </el-form-item>
-      <el-form-item label="Resources">
-        <el-radio-group v-model="form.resource">
-          <el-radio label="Sponsor" />
-          <el-radio label="Venue" />
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="Activity form">
-        <el-input v-model="form.desc" type="textarea" />
+      <el-form-item label="请输入你的问题">
+        <el-input v-model="form.desc" type="textarea" :rows="1" />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="onSubmit">Create</el-button>
-        <el-button @click="onCancel">Cancel</el-button>
+        <el-button type="primary" @click="onSubmit">提问</el-button>
+      </el-form-item>
+      <hr/>
+      <el-form-item label="">
+        <el-input v-html="form.answer" type="textarea" :rows="25" />
       </el-form-item>
     </el-form>
   </div>
 </template>
 
 <script>
+import { test } from '@/api/questionAndAnswer'
 export default {
   data() {
     return {
@@ -59,18 +28,32 @@ export default {
         delivery: false,
         type: [],
         resource: '',
-        desc: ''
+        desc: '',
+        answer: ''
       }
     }
   },
   methods: {
     onSubmit() {
-      this.$message('submit!')
+      // this.form.answer = "<b>生态公益林</b> 包括: 防护林   特殊通途林<br>" +
+      //   "<b>出处：</b>内蒙古自治区实施《中华人民共和国森林法》办法 第四章 第二十四条<br>" + "" +
+      //   "<b>条款内容：</b><p>森林实行生态公益林、商品林分类经营。生态公益林包括防护林、特种用途林；商品林包括用材林、经济林和薪炭林。\n" +
+      //   "　　生态公益林以各级人民政府投入为主，鼓励单位和个人投工、投劳、投资建设；商品林主要由受益者投资建设和经营，各级人民政府应当给予扶持。\n</p>" +
+      //   "<button>查看全文</button>"
+      this.form.answer = "<b>老顶山风景区</b><br>" + "" +
+        "<p>此问题暂时无法回答</p>"
+      this.test_api()
     },
     onCancel() {
       this.$message({
         message: 'cancel!',
         type: 'warning'
+      })
+    },
+
+    test_api() {
+      test().then(res => {
+        console.log(res)
       })
     }
   }

@@ -3,7 +3,7 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">林业法律法规智能问答</h3>
+        <h3 class="title">林业法律法规智能问答系统</h3>
       </div>
 
       <el-form-item prop="username" v-show="false">
@@ -111,20 +111,7 @@ export default {
       })
     },
     handleLogin() {
-      this.$refs.loginForm.validate(valid => {
-        if (valid) {
-          this.loading = true
-          this.$store.dispatch('user/login', this.loginForm).then(() => {
-            this.$router.push({ path: this.redirect || '/' })
-            this.loading = false
-          }).catch(() => {
-            this.loading = false
-          })
-        } else {
-          console.log('error submit!!')
-          return false
-        }
-      })
+      this.$router.push({ path: this.redirect || '/' })
     }
   }
 }
@@ -222,7 +209,7 @@ $light_gray:#eee;
     position: relative;
 
     .title {
-      font-size: 40px;
+      font-size: 35px;
       color: $light_gray;
       margin: 0px auto 40px auto;
       text-align: center;

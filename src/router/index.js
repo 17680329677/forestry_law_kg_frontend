@@ -56,6 +56,20 @@ export const constantRoutes = [
   },
 
   {
+    path: '/kg_qa',
+    component: Layout,
+    redirect: '/kg_qa/index',
+    children: [
+      {
+        path: 'index',
+        name: 'qa',
+        component: () => import('@/views/question_answer/index'),
+        meta: { title: '智能问答', icon: 'form' }
+      }
+    ]
+  },
+
+  {
     path: '/kg',
     component: Layout,
     redirect: '/kg/show',
@@ -72,24 +86,10 @@ export const constantRoutes = [
   },
 
   {
-    path: '/kg_qa',
-    component: Layout,
-    redirect: '/kg_qa/index',
-    children: [
-      {
-        path: 'index',
-        name: 'qa',
-        component: () => import('@/views/question_answer/index'),
-        meta: { title: '智能问答', icon: 'form' }
-      }
-    ]
-  },
-
-  {
     path: '/search',
     component: Layout,
     redirect: '/search/index',
-    meta: { title: '全文检索', icon: 'nested' },
+    meta: { title: '法律法规检索', icon: 'nested' },
     children: [
       {
         path: 'index',
