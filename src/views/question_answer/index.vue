@@ -5,7 +5,7 @@
         <el-input v-model="form.desc" type="textarea" :rows="1" />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="onSubmit">提问</el-button>
+        <el-button type="primary" @click="question_submit(form.desc)">提问</el-button>
       </el-form-item>
       <hr/>
       <el-form-item label="">
@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import { test } from '@/api/questionAndAnswer'
+import { test, questionSubmit } from '@/api/questionAndAnswer'
 export default {
   data() {
     return {
@@ -53,6 +53,12 @@ export default {
 
     test_api() {
       test().then(res => {
+        console.log(res)
+      })
+    },
+
+    question_submit(question) {
+      questionSubmit(question).then(res => {
         console.log(res)
       })
     }

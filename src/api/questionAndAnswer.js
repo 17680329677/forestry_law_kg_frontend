@@ -6,3 +6,14 @@ export function test() {
     method: 'get'
   })
 }
+
+
+export function questionSubmit(question) {
+  return request({
+    url: '/forestry_law/question',
+    method: 'get',
+    params: {
+      'question': question
+    }
+  })
+}
