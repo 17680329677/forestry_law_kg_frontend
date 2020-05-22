@@ -49,10 +49,14 @@ service.interceptors.response.use(
     // if the custom code is not 20000, it is judged as an error.
     if (res.code !== 0) {
       Message({
-        message: res.message || 'Error',
-        type: 'error',
+        message: res.message || '无法理解的提问',
+        type: 'info',
         duration: 3 * 1000
       })
+      
+      if (res.code === 1001) {
+        return res
+      }
 
       // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
       if (res.code === 50008 || res.code === 50012 || res.code === 50014) {

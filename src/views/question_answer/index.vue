@@ -2,48 +2,106 @@
   <div class="app-container">
     <el-form ref="form" :model="form" label-width="120px">
       <el-form-item label="请输入你的问题">
-        <el-input v-model="form.desc" type="textarea" :rows="1" />
+        <el-input v-model="form.desc" type="input" :rows="1" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="question_submit(form.desc)">提问</el-button>
       </el-form-item>
-      <hr/>
-      <el-form-item label="">
-        <el-input v-html="form.answer" type="textarea" :rows="25" />
-      </el-form-item>
+
+      <el-divider content-position="left">提问结果</el-divider>
+
+      <el-collapse accordion v-model="activeNames" @change="handleChange" v-show="isShow">
+        <el-collapse-item title="--实体及关系信息--" name="1">
+          <div>实体类型：<span v-text="answer.entity_type"></span></div>
+          <div>识别实体：<span v-text="answer.entity"></span></div>
+          <div>关系识别：<span v-text="answer.relation_type"></span></div>
+        </el-collapse-item>
+
+        <el-collapse-item title="--答案及出处--" name="2">
+          <div>
+            <b>答案涉及实体：</b>
+            <ul>
+              <li v-for="obj in answer.relation_object">{{obj}}</li>
+            </ul>
+          </div>
+
+          <div style="width: 90%;">
+            <el-collapse accordion>
+              <el-collapse-item v-for="(item, index) in answer.origin_info" :key="index" :title="'出处' + (parseInt(index) + parseInt('1'))" :name="item.law_id">
+                <div>
+                  <b>来源法律：</b>
+                  <span>{{item.law_name}}</span>
+                </div>
+
+                <div>
+                  <b>来源条款：</b>
+                  <span>{{item.chap_data.chapter_key + ' ' + item.chap_data.chapter_name + ' ' + item.article_data.article_key}}</span>
+                </div>
+
+                <div>
+                  <b>详细内容：</b>
+                  <p v-html="item.article_data.article_content"></p>
+                </div>
+
+                <div>
+                  <el-popover placement="right" width="950" height="1000" trigger="click" @show="law_info(item.law_name)">
+                    <div>
+                      <div style="text-align: center"><b v-text="lawInfo.name"></b></div>
+                      <div style="text-align: center">
+                        <span>颁布时间：{{lawInfo.pub_time}}</span>
+                        <el-divider direction="vertical"></el-divider>
+                        <span>颁布机构：{{lawInfo.pub_unit}}</span>
+                        <el-divider direction="vertical"></el-divider>
+                        <span>实施时间：{{lawInfo.implement_time}}</span>
+                        <el-divider direction="vertical"></el-divider>
+                        <span>状态：{{lawInfo.status}}</span>
+                      </div>
+                      <div style="word-break: normal; white-space: pre-wrap;">
+                        <el-divider><i class="el-icon-document"></i></el-divider>
+                        {{lawInfo.content}}
+                      </div>
+                    </div>
+
+                    <el-button type="primary" slot="reference" icon="el-icon-search" size="mini" round>查看全文</el-button>
+                  </el-popover>
+                </div>
+              </el-collapse-item>
+            </el-collapse>
+          </div>
+
+        </el-collapse-item>
+      </el-collapse>
     </el-form>
   </div>
 </template>
 
 <script>
-import { test, questionSubmit } from '@/api/questionAndAnswer'
+import { questionSubmit, get_law_info } from '@/api/questionAndAnswer'
+import { MessageBox, Message } from 'element-ui'
 export default {
   data() {
     return {
       form: {
-        name: '',
-        region: '',
-        date1: '',
-        date2: '',
         delivery: false,
-        type: [],
-        resource: '',
-        desc: '',
-        answer: ''
-      }
+        desc: ''
+      },
+      answer: {
+        origin_info: "",
+        entity_type: "",
+        entity:"",
+        relation_type: "",
+        relation_object: []
+      },
+      lawInfo: {},
+      activeNames: ['1'],
+      isShow: false
     }
   },
   methods: {
-    onSubmit() {
-      // this.form.answer = "<b>生态公益林</b> 包括: 防护林   特殊通途林<br>" +
-      //   "<b>出处：</b>内蒙古自治区实施《中华人民共和国森林法》办法 第四章 第二十四条<br>" + "" +
-      //   "<b>条款内容：</b><p>森林实行生态公益林、商品林分类经营。生态公益林包括防护林、特种用途林；商品林包括用材林、经济林和薪炭林。\n" +
-      //   "　　生态公益林以各级人民政府投入为主，鼓励单位和个人投工、投劳、投资建设；商品林主要由受益者投资建设和经营，各级人民政府应当给予扶持。\n</p>" +
-      //   "<button>查看全文</button>"
-      this.form.answer = "<b>老顶山风景区</b><br>" + "" +
-        "<p>此问题暂时无法回答</p>"
-      this.test_api()
+    handleChange(val) {
+      console.log(val);
     },
+
     onCancel() {
       this.$message({
         message: 'cancel!',
@@ -51,24 +109,55 @@ export default {
       })
     },
 
-    test_api() {
-      test().then(res => {
-        console.log(res)
+    question_submit(question) {
+      questionSubmit(question).then(res => {
+        if (res.code === 0) {
+          this.answer = res.data
+          this.answer.relation_object = [...new Set(res.data.relation_object)]
+
+          for (var i = 0; i < this.answer.origin_info.length; i++) {
+            var info = this.answer.origin_info[i]
+            var article_content = info.article_data.article_content
+            var origin_content = info.article_data.origin_content
+            var reg = new RegExp("(" + origin_content + ")", "g");
+            this.answer.origin_info[i].article_data.article_content =
+              article_content.replace(reg, '<b style="color:red">'+origin_content+'</b>');
+          }
+          this.isShow = true
+
+        } else if (res.code === 1001) {
+          this.isShow = false
+          Message({
+            message: error.message,
+            type: 'error',
+            duration: 3 * 1000
+          })
+        }
       })
     },
 
-    question_submit(question) {
-      questionSubmit(question).then(res => {
-        console.log(res)
+    law_info(law_name) {
+      get_law_info(law_name).then(res => {
+        if (res.code === 0) {
+          this.lawInfo = res.law_info
+          this.lawInfo.content.replace(/\n/g,"<br/>")
+          console.log(this.lawInfo.content)
+          console.log(this.lawInfo)
+        } else if (res.code === 1001) {
+
+        }
       })
     }
   }
 }
 </script>
 
-<style scoped>
-.line{
-  text-align: center;
-}
+<style>
+  .el-popover{
+    width: 100%;
+    height: 100%;
+    overflow: scroll;
+  }
 </style>
+
 

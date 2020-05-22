@@ -96,7 +96,13 @@ export const constantRoutes = [
         name: 'search',
         component: () => import('@/views/search/index'),
         meta: { title: '全文检索', icon: 'example' }
-      }
+      },
+      {
+        path: 'law_detail',
+        name: 'law_detail',
+        component: () => import('@/views/search/law_detail'),
+        hidden: true
+      },
     ]
   },
 
