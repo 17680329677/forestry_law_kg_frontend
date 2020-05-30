@@ -2,7 +2,7 @@
   <div class="app-container">
 <!--    <div id="main" :style="{width: '300px', height: '300px'}"></div>-->
     <el-form ref="form" :model="form" label-width="120px">
-      <el-form-item label="实体/关系名称">
+      <el-form-item label="实体名称">
         <el-input v-model="form.name" />
       </el-form-item>
       <el-form-item>
