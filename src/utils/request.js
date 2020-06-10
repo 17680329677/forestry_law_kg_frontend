@@ -8,7 +8,7 @@ const service = axios.create({
   // baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
   // withCredentials: true, // send cookies when cross-domain requests
   baseURL: 'http://127.0.0.1:8080', // url = base url + request url
-  timeout: 5000*30 // request timeout
+  timeout: 5000*60 // request timeout
 })
 
 // request interceptor
@@ -54,7 +54,7 @@ service.interceptors.response.use(
         duration: 3 * 1000
       })
       
-      if (res.code === 1001) {
+      if (res.code === 1001 || res.code === 1002) {
         return res
       }
 

@@ -1,6 +1,10 @@
 <template>
   <div class="app-container">
-    <el-form ref="form" :model="form" label-width="120px">
+    <el-form ref="form" :model="form" label-width="120px"
+             v-loading="loading"
+             element-loading-text="拼命思考中，根据是否触发实体链接，所需时间不同！"
+             element-loading-spinner="el-icon-loading"
+             element-loading-background="rgba(0, 0, 0, 0.8)">
       <el-form-item label="请输入你的问题">
         <el-input v-model="form.desc" type="input" :rows="1" />
       </el-form-item>
@@ -11,13 +15,21 @@
       <el-divider content-position="left">提问结果</el-divider>
 
       <el-collapse accordion v-model="activeNames" @change="handleChange" v-show="isShow">
-        <el-collapse-item title="--实体及关系信息--" name="1">
+        <el-collapse-item title="--实体及关系信息--" name="0" v-show="!hasAnswer">
+          <div>实体类型：<span v-text="entity_info.entity_type"></span></div>
+          <div>识别实体：<span v-text="entity_info.entity"></span></div>
+          <div>实体链接：<span v-text="entity_info.linked_entity"></span></div>
+          <div>关系识别：<span v-text="entity_info.relation_type"></span></div>
+        </el-collapse-item>
+
+        <el-collapse-item title="--实体及关系信息--" name="1" v-show="hasAnswer">
           <div>实体类型：<span v-text="answer.entity_type"></span></div>
           <div>识别实体：<span v-text="answer.entity"></span></div>
+          <div>实体链接：<span v-text="answer.linked_entity"></span></div>
           <div>关系识别：<span v-text="answer.relation_type"></span></div>
         </el-collapse-item>
 
-        <el-collapse-item title="--答案及出处--" name="2">
+        <el-collapse-item title="--答案及出处--" name="2" v-show="hasAnswer">
           <div>
             <b>答案涉及实体：</b>
             <ul>
@@ -81,20 +93,29 @@ import { MessageBox, Message } from 'element-ui'
 export default {
   data() {
     return {
+      loading: false,
       form: {
         delivery: false,
         desc: ''
+      },
+      entity_info: {
+        entity_type: "",
+        entity:"",
+        linked_entity: "",
+        relation_type: "",
       },
       answer: {
         origin_info: "",
         entity_type: "",
         entity:"",
+        linked_entity: "",
         relation_type: "",
         relation_object: []
       },
       lawInfo: {},
       activeNames: ['1'],
-      isShow: false
+      isShow: false,
+      hasAnswer: false
     }
   },
   methods: {
@@ -110,7 +131,9 @@ export default {
     },
 
     question_submit(question) {
+      this.loading = true
       questionSubmit(question).then(res => {
+        this.loading = false
         if (res.code === 0) {
           this.answer = res.data
           this.answer.relation_object = [...new Set(res.data.relation_object)]
@@ -124,12 +147,24 @@ export default {
               article_content.replace(reg, '<b style="color:red">'+origin_content+'</b>');
           }
           this.isShow = true
+          this.hasAnswer = true
 
         } else if (res.code === 1001) {
+          this.loading = false
           this.isShow = false
           Message({
             message: error.message,
             type: 'error',
+            duration: 3 * 1000
+          })
+        } else if (res.code === 1002) {
+          this.loading = false
+          this.entity_info = res.data
+          this.isShow = true
+          this.hasAnswer = false
+          Message({
+            message: error.message,
+            type: 'info',
             duration: 3 * 1000
           })
         }

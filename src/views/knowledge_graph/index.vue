@@ -97,7 +97,7 @@ export default {
       var option = {
         // 图的标题
         title: {
-          text: 'ECharts 关系图'
+          text: '实体-关系图'
         },
         // 提示框的配置
         tooltip: {
